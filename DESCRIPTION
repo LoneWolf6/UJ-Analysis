@@ -1,0 +1,15 @@
+Package: UJAnalysis
+Type: Package
+Title: Creation and Analysis of User Journey Data
+Version: 0.1.0
+Author: Vincent Bremer
+Maintainer: Vincent Bremer <vincentbremer06@gmail.com>
+Description: This package intends to help users analyze User Journey data. It helps to create a rectangle representation of the data, perform different types of feature engineering, and execute and validate multiple machine learning techniques.  
+Depends: R (>= 3.4.3), doSNOW (>= 1.0.15), snow (>= 0.4-2), foreach (>= 1.4.3), iterators (>= 1.0.8), pbapply (>= 1.3-3), parallel (>= 3.4.3), caret (>= 6.0.77), glmnet (>= 2.0.13), e1071 (>= 1.6.8), hydroGOF (>= 0.3.10), imputeMissings (>= 0.0.3), ROCR (>= 1.0.7), VIM (>= 4.7.0), xgboost (>= 0.6.4.1), data.table (>= 1.10.4), plyr (>= 1.8.4) 
+Imports: doSNOW (>= 1.0.15), snow (>= 0.4-2), foreach (>= 1.4.3), iterators (>= 1.0.8), pbapply (>= 1.3-3), parallel (>= 3.4.3), caret (>= 6.0.77), glmnet (>= 2.0.13), e1071 (>= 1.6.8), hydroGOF (>= 0.3.10), imputeMissings (>= 0.0.3), ROCR (>= 1.0.7), VIM (>= 4.7.0), xgboost (>= 0.6.4.1), data.table (>= 1.10.4), plyr (>= 1.8.4) 
+License: What license is it under?
+Encoding: UTF-8
+LazyData: true
+Suggests: knitr,
+    rmarkdown
+VignetteBuilder: knitr
