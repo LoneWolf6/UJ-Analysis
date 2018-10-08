@@ -964,7 +964,6 @@ analyzeUJ = function(input, target=F, type='cont', firstFeats=F, lastFeats=F, su
         }else{
           fit_svm = svm(formula = formula(modelString), data = train, scale=scale, type=typeSVM, probability=T)
         }
-        fit_svm = svm(formula = formula(modelString), data = train, scale=scale, type=typeSVM, probability=T)
         res$perf_svm[[i]] = attr(predict(fit_svm, test, probability=T),"probabilities")[,1]
         res$pred$pred_svm = ifelse(res$perf_svm[[i]] >= proba, 1, 0)
       }
