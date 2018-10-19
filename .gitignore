@@ -1,2 +1,3 @@
 # Don't track content of these folders
 .DS_Store
+.Rproj.user
