@@ -1099,6 +1099,24 @@ analyzeUJ = function(input, target=F, type='cont', firstFeats=F, lastFeats=F, su
 
       ########
 
+      # PCA (describe PCA, PCA_only, and comp in manual)
+      if(PCA == T){
+        resPCA = prcomp(input[,sapply(input, is.numeric)][,-which(names(input) %in% c('id', target))], scale=T)
+        std_dev <- resPCA$sdev
+        pr_var <- std_dev^2
+        prop_varex <- pr_var/sum(pr_var)
+        # if comps not given, choose as many components that explain 99% of the variance
+        if(comps == 0) comps = which(cumsum(prop_varex)>=0.99)[1]
+        PCAinput = resPCA$x[,1:comps]
+        if(PCA_only == T){
+          input = PCAinput
+        }
+        if(PCA_only == F){
+          input = cbind(input, PCAinput)
+        }
+        modelString = getModelString(input, target, exFeat)
+      }
+
       # all/svm
       if(method == 'all' || 'svm' %in% method){
         if(optPara == T){
