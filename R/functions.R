@@ -736,7 +736,7 @@ imputeData = function(input, perc=F, missing, target, percEx){
 }
 
 # performs k-fold cross validation using multiple machine learning techniques for comparison
-analyzeUJ = function(input, target=F, type='cont', firstFeats=F, lastFeats=F, sumFeats = F, method='all', PCA=F, PCA_only=F, comps=0, task='regression', interval=F, crossValidation=T, split=70, folds=10, optPara=F, missing=F,imp=F, perc=F, percEx=F, exFeat=NULL, ROC=F, proba=.5, scale=T){
+analyzeUJ = function(input, target=F, type='cont', firstFeats=F, lastFeats=F, sumFeats = F, method='all', PCA=F, PCAOnly=F, comps=0, task='regression', interval=F, crossValidation=T, split=70, folds=10, optPara=F, missing=F,imp=F, perc=F, percEx=F, exFeat=NULL, ROC=F, proba=.5, scale=T){
 
   ######
   ## prepare data
@@ -754,7 +754,9 @@ analyzeUJ = function(input, target=F, type='cont', firstFeats=F, lastFeats=F, su
   if(!any(colnames(input) %in% target)) stop("Cannot find target variable in input.")
   if(task == "classification" && length(unique(input[,target])) != 2) stop("Currently, there is no multi-class classification available. Check your target variable.")
   if(check_type(input) == F) stop("The input is not of type 'data.frame'.")
+  if(comps < 0 || !(is.numeric(comps))) stop("The parameter comps is not specified correctly.")
   if(!is.numeric(folds)) stop("The parameter 'folds' is not numeric. Provide appropriate parameter value.")
+  if((!(isTRUE(PCA)) && !(isFALSE(PCA))) || (!(isTRUE(PCAOnly)) && !(isFALSE(PCAOnly)))) stop("Parameter PCA or PCAOnly are not set correctly.")
   if(percEx != F && any(!(percEx %in% colnames(input)))) stop("Specified features for exclusion of deletion depending on missing data does not exist in provided data.")
   # check for selected type of analysis
   if(!(type %in% c('cont', 'aggregate'))) stop("Please provide valid input for parameter 'type'.")
@@ -933,8 +935,7 @@ analyzeUJ = function(input, target=F, type='cont', firstFeats=F, lastFeats=F, su
 
     res$obs = c(res$obs, test[,target])
 
-
-    # PCA (describe PCA, PCA_only, and comp in manual)
+    # PCA
     if(PCA == T){
       resPCA = prcomp(train[,sapply(train, is.numeric)][,-which(names(train) %in% c('id', target))], scale=T)
       std_dev <- resPCA$sdev
@@ -944,13 +945,13 @@ analyzeUJ = function(input, target=F, type='cont', firstFeats=F, lastFeats=F, su
       if(comps == 0) comps = which(cumsum(prop_varex)>=0.99)[1]
       PCAtrain = resPCA$x[,1:comps]
       PCAtest = predict(resPCA, newdata = test)[,1:comps]
-      if(PCA_only == T){
-        train = PCAtrain
-        test = PCAtest
+      if(PCAOnly == T){
+        train = cbind(train['id'], train[target], PCAtrain)
+        test = cbind(test['id'], test[target], PCAtest)
       }
-      if(PCA_only == F){
-        train = cbind(train, PCAtrain)
-        test = cbind(test, PCAtest)
+      if(PCAOnly == F){
+        train = cbind(train['id'], train[target], train[,-which(names(train) %in% names(train[,sapply(train, is.numeric)]))], PCAtrain)
+        test = cbind(test['id'], test[target], test[,-which(names(test) %in% names(test[,sapply(test, is.numeric)]))], PCAtest)
       }
       modelString = getModelString(train, target, exFeat)
     }
@@ -1099,7 +1100,7 @@ analyzeUJ = function(input, target=F, type='cont', firstFeats=F, lastFeats=F, su
 
       ########
 
-      # PCA (describe PCA, PCA_only, and comp in manual)
+      # PCA
       if(PCA == T){
         resPCA = prcomp(input[,sapply(input, is.numeric)][,-which(names(input) %in% c('id', target))], scale=T)
         std_dev <- resPCA$sdev
@@ -1108,11 +1109,13 @@ analyzeUJ = function(input, target=F, type='cont', firstFeats=F, lastFeats=F, su
         # if comps not given, choose as many components that explain 99% of the variance
         if(comps == 0) comps = which(cumsum(prop_varex)>=0.99)[1]
         PCAinput = resPCA$x[,1:comps]
-        if(PCA_only == T){
-          input = PCAinput
+        colnames(PCAinput) = paste("PCA", rownames(resPCA$rotation)[1:comps], sep="_")
+
+        if(PCAOnly == T){
+          input = cbind(input['id'], input[target], PCAinput)
         }
-        if(PCA_only == F){
-          input = cbind(input, PCAinput)
+        if(PCAOnly == F){
+          input = cbind(input['id'], input[target], input[,-which(names(input) %in% names(input[,sapply(input, is.numeric)]))], PCAinput)
         }
         modelString = getModelString(input, target, exFeat)
       }

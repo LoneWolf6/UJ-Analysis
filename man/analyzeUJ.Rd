@@ -8,7 +8,7 @@
 This function applies multiple machine learning techniques to all data and selects features that contribute to the prediction performance. It then predicts the specified outcome based on both all data and only selected features. Additionally, all machine learning techniques are evaluated by the RMSE and MAE which are returned as well as the predictions and effects for each model.
 }
 \usage{
-analyzeUJ(input, target, type, firstFeats, lastFeats, sumFeats, method, task, interval, crossValidation, split, folds, optPara, missing, imp, perc, percEx, exFeat, ROC, proba, scale)
+analyzeUJ(input, target, type, firstFeats, lastFeats, sumFeats, method, PCA, PCAOnly, comps, task, interval, crossValidation, split, folds, optPara, missing, imp, perc, percEx, exFeat, ROC, proba, scale)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -48,6 +48,15 @@ ridge: ridge regression according to the \link[glmnet]{glmnet} function. The opt
 treeBoost: extreme gradient boosting trees according to the \link[xgb.train]{xgboost} function with maximum depth of 3, maximum number of boosting iterations of 1000, and the rest of the parameters are default.
 
 (Multiple parameters are tuned if optPara=T (for more information, see optPara))
+}
+  \item{PCA}{
+an optional logical value True or False. Defines if Principal Component Analysis (PCA) is executed for numeric predictors only.
+}
+  \item{PCAOnly}{
+an optional logical value True or False. Defines if only principal components are utilized as features (True) for the predictive models or if the non-numeric features are also included (False). Default is False.
+}
+  \item{comps}{
+an optional non-negative numeric value defining the number of components to utilize. If not specified, as many components are utilized until 99 percent of the variance is explained.
 }
   \item{task}{
 an optional character string defining the task of analysis. Can be either 'classification' or 'regression'. However, this parameter should be set according to the goal of the analysis. Classification currently only works for binary classification. Default is 'regression'.
