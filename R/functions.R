@@ -660,8 +660,8 @@ is.wholenumber <- function(x, tol = .Machine$double.eps^0.5)  abs(x - round(x)) 
 # searches for best svm cost and gamma parameters on a grid
 getBestSVM =function(input, model_str,target, typeSVM, task){
   ikx = which(colnames(input)==target)
-  costStepSize  = 10^seq(-5,5,0.1)
-  gammaStepSize = 2^(-3:3)
+  costStepSize  = 10^seq(-2,4,0.3)
+  gammaStepSize = 2^(-2:2)
   modelmatrix = sparse.model.matrix(formula(model_str),input)
   if(task == "classification") obj_radial = tune.svm(x=modelmatrix,y=as.factor(input[,ikx]),cost= costStepSize,gamma=gammaStepSize,kernel='radial',type=typeSVM,cross =2)
   if(task == "regression") obj_radial = tune.svm(x=modelmatrix,y=input[,ikx],cost= costStepSize,gamma=gammaStepSize,kernel='radial',type=typeSVM,cross =2)
@@ -675,11 +675,11 @@ getBestSVM =function(input, model_str,target, typeSVM, task){
 getBestXgboost = function(mat, train, task, target){
 
   xgb_grid = expand.grid(nrounds = 1000,
-                         eta = c(0.001, 0.01, 0.1), #.15,0.2,.3
-                         max_depth = c(6,8,10), #2,4, 12
-                         gamma = c(0,1,2), #.2
-                         colsample_bytree = c(0.4,0.8), #0.6,0.9
-                         min_child_weight = c(1,10,50),
+                         eta = c(0.1, 0.01, 0.0001),
+                         max_depth = c(2,6,10),
+                         gamma = c(0,1),
+                         colsample_bytree = c(0.4,0.8),
+                         min_child_weight = c(1,20),
                          subsample = 1)
 
   if(task == "classification"){
