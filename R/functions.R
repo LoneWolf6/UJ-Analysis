@@ -674,13 +674,13 @@ getBestSVM =function(input, model_str,target, typeSVM, task){
 # grid search for xgboost
 getBestXgboost = function(mat, train, task, target){
 
-  xgb_grid = expand.grid(nrounds = 1000,
-                         eta = c(0.1, 0.01, 0.0001),
-                         max_depth = c(2,6,10),
-                         gamma = c(0,1),
-                         colsample_bytree = c(0.4,0.8),
-                         min_child_weight = c(1,20),
-                         subsample = 1)
+  xgb_grid = expand.grid(nrounds = 1000, # maximum number of iterations
+                         eta = c(0.1, 0.01, 0.0001), # learning rate
+                         max_depth = c(2,6,10), # depth of tree
+                         gamma = c(0,1), # regularizer
+                         colsample_bytree = c(0.4,0.8), # number of features supplied to the tree
+                         min_child_weight = c(1,20), # blocks the potential feature interactions to prevent overfitting
+                         subsample = 1) # controls the number of features (variables) supplied to a tree
 
   if(task == "classification"){
     y=as.factor(train[,which(colnames(train) == target)])
