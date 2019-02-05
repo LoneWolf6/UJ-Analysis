@@ -889,7 +889,7 @@ analyzeUJ = function(input, target=F, type='cont', firstFeats=F, lastFeats=F, su
 
   # create folds for cross-validation
   if(isTRUE(crossValidation)){
-    fold = createFolds(input[,target], k = folds, list = TRUE, returnTrain = FALSE)
+    fold = createFolds(factor(input[,target]), k = folds, list = TRUE)
   }else{
     fold = 1
     folds = 1
