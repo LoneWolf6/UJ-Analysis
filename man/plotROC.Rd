@@ -12,11 +12,18 @@ plotROC(ROCValues, folds)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{ROCValues}{
-the results of analyzeUJ.
+  \item{values}{
+the values created in analyzeUJ function for a specific method. Input could be, for example, res$performance$Lasso.
 }
-  \item{folds}{
-the number of folds utilized when executed analyzeUJ.
+
+  \item{type}{
+an optional character string defining the type of ROC curve desired. Default is 'avg'.
+
+avg: ROC curve averaged over all folds of k-fold cross-validation.
+
+err: an optional logical value True or False. Defining if error bar around ROC curve is desired (only if type=avg).
+
+each: ROC curves for each fold of k-fold cross-validation.
 }
 
 }
@@ -24,11 +31,7 @@ the number of folds utilized when executed analyzeUJ.
 %%  ~~ If necessary, more details than the description above ~~
 }
 \value{
-Function returns a list containing the following components:
-
-\item{input}{A data frame consisting of the utilized input data for analysis}
-
-\item{results}{A list containing the trained methods based on all data}
+Function plots the desired ROC curve.
 
 %%  ~Describe the value returned
 %%  If it is a LIST, use
@@ -48,9 +51,9 @@ Function returns a list containing the following components:
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
-\seealso{
-\code{\link[caret]{createFolds}}, \code{\link[imputeMissings]{impute}}, \code{\link[stats]{glm}}, \code{\link[glmnet]{glmnet}}, \code{\link[e1071]{svm}}, \code{\link[VIM]{kNN}}
-}
+%\seealso{
+%\code{\link[caret]{createFolds}}, \code{\link[imputeMissings]{impute}}, \code{\link[stats]{glm}}, \code{\link[glmnet]{glmnet}}, \code{\link[e1071]{svm}}, \code{\link[VIM]{kNN}}
+%}
 \examples{
 # create data frame with mandatory columns
 data = data.frame('id'=length(rep(c(1:5), each=600)),
