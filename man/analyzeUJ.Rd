@@ -116,14 +116,14 @@ Function returns a list containing the following components:
 
 \item{fold}{A list consisting of the indices for each fold of k-fold cross-validation}
 
-\item{TargetObservations}{A numeric vector containing the target observations for each fold}
+\item{TargetObservations}{A numeric vector containing the target observations}
 
-\item{TargetPredictions}{A numeric vector containing the target predictions for each fold}
+\item{TargetPredictions}{A numeric vector containing the target predictions for each executed method}
 
 \item{performance}{
-Regression: A data frame consisting of the cross-validated prediction error indicated by mean absolute error and root mean square error for all specified methods and an addtional "mean model", which utilizes the mean of the training data as prediction.
+Regression: A data frame consisting of the cross-validated prediction error indicated by mean absolute error and root mean square error for all specified methods and an addtional "mean model", which utilizes the mean of the training data as prediction. These performance measures are included or each fold and averaged across folds.
 
-Classification: A list consisting of confusion matrices and receiver operating characteristics curves (ROC) and under the curve (AUC) values according to the \link[ROCR]{performance} function (if ROC=T) for each method.
+Classification: A list consisting of confusion matrices (for each fold and summed up), values for plotting the receiver operating characteristics curves (ROC), and area under the curve (AUC) values (for each fold and averaged) according to the \link[ROCR]{performance} function (if ROC=T) for each executed method.
 }
 
 \item{results}{A list containing the trained methods based on all data}
