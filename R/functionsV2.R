@@ -1479,13 +1479,17 @@ plotROC = function(values, type='avg', err=T){
   }
 
   if(type == 'each'){
-    ROCplot = ggplot()
-    for(i in 1:folds){
-      ROCplot = ROCplot + geom_line(data=data.frame(TPR=ROCs[i,], FPR=seq(0,1,length.out = 1001)), aes(x=FPR, y=TPR), size=0.6) +
-        geom_abline(linetype = 2) +
-        theme(legend.background=element_blank(), axis.text=element_text(size=14),
-              axis.title=element_text(size=18), legend.text=element_text(size=18), legend.position = c(0.8, 0.2))
-    }
+    ROCs2 = data.frame(t(ROCs))
+    ROCs2['FPR'] = seq(0,1,length.out = 1001)
+    ROCs2 = melt(ROCs2, id.vars="FPR")
+    cols = palette(rainbow(folds))
+
+    ROCplot = ggplot(ROCs2, aes(x=FPR, y=value, color=variable)) + geom_path() +
+      labs(x="FPR", y="TPR") +
+      scale_color_manual(name = "", labels=paste('AUC: ', round(values$AUCFolds,3), sep=""), values = cols) +
+      theme(legend.background=element_blank(), axis.text=element_text(size=14),
+            axis.title=element_text(size=18), legend.text=element_text(size=18), legend.position = c(0.9, 0.2)) +
+      geom_abline(linetype = 2)
     return(ROCplot)
   }
 }
