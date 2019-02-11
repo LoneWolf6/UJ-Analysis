@@ -1438,3 +1438,54 @@ analyzeUJ = function(input, target=F, type='cont', firstFeats=F, lastFeats=F, su
 
   return(result)
 }
+
+# plot roc function
+plotROC = function(values, type='avg', err=T){
+
+  folds=length(values$ROCValues)
+
+  ROC_vals = list()
+  for(k in 1:folds){
+    res = c(0)
+    for(i in seq(0,1,length.out = 1000)){
+      res = c(res,ROCValues(unlist(values$ROCValues[[k]]@x.values),
+                            unlist(values$ROCValues[[k]]@y.values),i))
+    }
+    ROC_vals[[k]] = res
+  }
+
+  ROCs = matrix(unlist(ROC_vals), ncol=1001, byrow=T)
+
+  if(type == 'avg' && isTRUE(err)){
+    sd = apply(ROCs, 2, sd)
+    ROCplot = ggplot() +
+      geom_line(data=data.frame(TPR=colMeans(ROCs), FPR=seq(0,1,length.out = 1001)), aes(x=FPR, y=TPR, color='a'), size=0.8) +
+      geom_abline(linetype = 2) +
+      geom_ribbon(aes(ymin=colMeans(ROCs)+sd, ymax=colMeans(ROCs)-sd, x=seq(0,1,length.out = 1001)), alpha=0.2) +
+      scale_color_manual(name = "", labels=paste('AUC: ', round(values$AUCMean,3), sep=""), values = c('a'="black")) +
+      theme(legend.background=element_blank(), axis.text=element_text(size=14),
+            axis.title=element_text(size=18), legend.text=element_text(size=18), legend.position = c(0.8, 0.2))
+    return(ROCplot)
+  }
+
+  if(type == 'avg' && !(isTRUE(err))){
+    ROCplot = ggplot() +
+      geom_line(data=data.frame(TPR=colMeans(ROCs), FPR=seq(0,1,length.out = 1001)), aes(x=FPR, y=TPR, color='a'), size=0.8) +
+      geom_abline(linetype = 2) +
+      scale_color_manual(name = "", labels=paste('AUC: ', round(values$AUCMean,3), sep=""), values = c('a'="black")) +
+      theme(legend.background=element_blank(), axis.text=element_text(size=14),
+            axis.title=element_text(size=18), legend.text=element_text(size=18), legend.position = c(0.8, 0.2))
+    return(ROCplot)
+  }
+
+  if(type == 'each'){
+    ROCplot = ggplot()
+    for(i in 1:folds){
+      ROCplot = ROCplot + geom_line(data=data.frame(TPR=ROCs[i,], FPR=seq(0,1,length.out = 1001)), aes(x=FPR, y=TPR), size=0.6) +
+        geom_abline(linetype = 2) +
+        theme(legend.background=element_blank(), axis.text=element_text(size=14),
+              axis.title=element_text(size=18), legend.text=element_text(size=18), legend.position = c(0.8, 0.2))
+    }
+    return(ROCplot)
+  }
+}
