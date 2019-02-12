@@ -151,7 +151,7 @@ Classification: A list consisting of confusion matrices (for each fold and summe
 }
 \examples{
 # create data frame with mandatory columns
-data = data.frame('id'=length(rep(c(1:5), each=600)),
+data = data.frame('id'=rep(c(1:5), each=600),
                   'type'=rep(c('Var1', 'Var2', 'Var3'), times=1000),
                   'value'=rep(c(1:5), times=600),
                   'date'=rep(seq(as.Date("2000/1/1"), by = "day", length.out=60), each=50))

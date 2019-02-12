@@ -1441,6 +1441,11 @@ analyzeUJ = function(input, target=F, type='cont', firstFeats=F, lastFeats=F, su
 
 # plot roc function
 plotROC = function(values, type='avg', err=T){
+  if(!(is.list(values$ROCValues))) stop("ROC values not existent in input.")
+  if(length(values$ROCValues) < 1) stop("Something went wrong. No ROC values in input.")
+  if(length(values$AUCFolds) < 1) stop("Something went wrong. No AUC values in input.")
+  if(length(values$AUCMean) < 1) stop("Something went wrong. No AUC values in input.")
+  if(!(length(values$AUCFolds) == length(values$ROCValues))) stop("Something went wrong. AUC values and ROC values do not have the same length.")
 
   folds=length(values$ROCValues)
 
