@@ -1,11 +1,11 @@
-\name{analyzeUJ}
-\alias{analyzeUJ}
+\name{plotROC}
+\alias{plotROC}
 %- Also NEED an '\alias' for EACH other topic documented here.
-\title{Analyze User Journey
+\title{Plot ROC curves
 %%  ~~function to do ... ~~
 }
 \description{
-This function plot ROC curves and AUC values based on the results of analyzeUJ function.
+This function plots ROC curves and AUC values based on the results of analyzeUJ function.
 }
 \usage{
 plotROC(values, type, err)
