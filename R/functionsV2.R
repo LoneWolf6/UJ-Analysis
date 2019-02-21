@@ -763,7 +763,7 @@ ROCValues=function(x,y,at){
 }
 
 # performs k-fold cross validation using multiple machine learning techniques for comparison
-analyzeUJ = function(input, target=F, type='cont', firstFeats=F, lastFeats=F, sumFeats = F, method='all', PCA=F, PCAOnly=F, comps=0, task='regression', interval=F, crossValidation=T, split=70, folds=10, optPara=F, missing=F,imp=F, perc=F, percEx=F, exFeat=NULL, ROC=F, proba=.5, scale=T){
+analyzeUJ = function(input, target=F, type='cont', firstFeats=F, lastFeats=F, sumFeats = F, method='all', PCA=F, PCAOnly=F, comps=0, task='regression', interval=F, crossValidation=T, split=70, folds=10, optPara=F, missing=F,imp=F, perc=F, percEx=F, exFeat=NULL, ROC=T, proba=.5, scale=T){
 
   ######
   ## prepare data

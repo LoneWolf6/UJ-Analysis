@@ -97,7 +97,7 @@ an optional character string defining the variables that should not be deleted e
 an optional character string defining the features not to be included in the analysis. Has to be specified by name of column of corresponding feature.
 }
   \item{ROC}{
-an optional logical value True or False. If True, ROC curve will be included in output if task is classification and only two labels exist. Default is False.
+an optional logical value True or False. If True, ROC curve will be included in output if task is classification and only two labels exist. Default is True.
 }
   \item{proba}{
 an optional numeric value between 0 and 1. If task is classification, this is the threshold for the classifying the observations. Confusion Matrix is based on this threshold. Default is .5.
