@@ -36,149 +36,20 @@ check_type_of_type = function(input){
   return(cnames)
 }
 
-# function for the creation of the UJ
-creation = function(input, cnames, d, store, where_all, store_add, additional, extraCol, where_extra, store_extra, where_add){
-  if(any(grepl(input['type'], cnames, fixed = T))){
-    where = grep(paste('^', input['type'], '$', sep = ''), colnames(d))
-    where_all = c(where_all, where)
-    if(is.na(input['value']) || input['value'] == ''){
-      store = c(store, NA)
-    }else{
-      store = c(store, as.character(input['value']))
-    }
+# function for the aggregation of the observations
+aggCreation = function(x, handling){
+  if(any(is.na(suppressWarnings(as.numeric(as.character(x)))))){
+    #x = Mode(x)
+    x = paste(tail(x,1), collapse="")
   }else{
-    cat('Type is not existent \n')
-  }
-  if(any(additional != F)){
-    if(length(which(colnames(d) %in% unique(unlist(input[additional])))) > 0){
-      where_add = which(colnames(d) %in% unique(unlist(input[additional])))
-      if(is.na(input[additional]) || input[additional] == ''){
-        store_add = c(store_add, NA)
-      }else{
-        store_add = c(store_add, as.character(input[additional]))
-      }
-    }else{
-      cat('Additional variable is not existent \n')
+    if(handling == "mean"){
+      x = mean(as.numeric(as.character(x)))
+    }
+    if(handling == "sum"){
+      x = sum(as.numeric(as.character(x)))
     }
   }
-  if(any(extraCol != F)){
-    if(length(which(colnames(d) %in% extraCol)) > 0){
-      where_extra = which(colnames(d) %in% extraCol)
-      if(is.na(input[extraCol]) || input[extraCol] == ''){
-        store_extra = c(store_extra, rep(NA, length(extraCol)))
-      }else{
-        store_extra = c(store_extra, as.character(input[extraCol]))
-      }
-    }else{
-      cat('Extra variable is not existent \n')
-    }
-  }
-  return(list(dat=store, where=where_all, add=store_add, where_add = where_add, extra=store_extra, where_extra=where_extra))
-}
-
-# adjusts parallel results for UJ creation
-create_res = function(res_fin, input){
-  for(i in 1:length(res_fin)){
-    if(class(input$id) == "factor"){
-      ids = which(res_fin[[i]]$id != as.numeric(levels(input$id)[i]))
-    }else{
-      ids = which(res_fin[[i]]$id != unique(input$id)[i])
-    }
-    if(length(ids) > 0) res_fin[[i]] = res_fin[[i]][-ids,]
-  }
-  res_fin = do.call("rbind", res_fin)
-  return(res_fin)
-}
-
-# function for the handling of the mean and sum procedure when multiple observation of same type exists at the same point in time
-mean_sum = function(dat, handling, colsProcess=F){
-  if(colsProcess==F){
-    dup = dat[dat[,2] %in% unique(dat[duplicated(dat[,2]),2]),]
-    cols = unique(unlist(dup[,2]))
-    val_res = c()
-    for(j in 1:length(cols)){
-      spot = which(dup[,2] == cols[j])
-      if(any(is.na(suppressWarnings(as.double(unlist(dup[spot,1])))))){
-        cat = T
-        if(length(unlist(dup[spot,1])) > 2 && length(unique(unlist(dup[spot,1]))) > 1){
-          val_res = c(val_res, Mode(unlist(dup[spot,1])))
-        }else{
-          val_res = c(val_res, unlist(dup[spot,1])[[1]])
-        }
-      }else{
-        cat = F
-        vals = suppressWarnings(as.double(unlist(dup[spot,1])))
-      }
-      if(handling == "sum" && cat == F) val_res = c(val_res, round(sum(vals), digits=3))
-      if(handling == "mean" && cat == F) val_res = c(val_res, round(mean(vals),digits=3))
-    }
-    dat = dat[!duplicated(dat[,2], fromLast = F),]
-    if(!is.null(val_res)){
-      if(length(dat) == 6){
-        dat$dat = as.character(val_res)
-      }else{
-        dat[which(dat[,2] %in% cols),1] = as.character(val_res)
-      }
-    }
-  }
-  if(colsProcess=='extraCol'){
-    if(length(dat[,5][[1]]) == 1){
-      dup = dat[dat[,6] %in% unique(dat[duplicated(dat[,6]),6]),]
-      cols = unique(unlist(dup[,6]))
-      val_res = c()
-      for(j in 1:length(cols)){
-        spot = which(dup[,6] == cols[j])
-        if(any(is.na(suppressWarnings(as.double(unlist(dup[spot,5])))))){
-          cat = T
-          if(length(unlist(dup[spot,5])) > 2 && length(unique(unlist(dup[spot,5]))) > 1){
-            val_res = c(val_res, Mode(unlist(dup[spot,5])))
-          }else{
-            val_res = c(val_res, unlist(dup[spot,5])[[1]])
-          }
-        }else{
-          cat = F
-          vals = suppressWarnings(as.double(unlist(dup[spot,5])))
-        }
-        if(handling == "sum" && cat == F) val_res = c(val_res, round(sum(vals), digits=3))
-        if(handling == "mean" && cat == F) val_res = c(val_res, round(mean(vals),digits=3))
-      }
-      dat = dat[!duplicated(dat[,6], fromLast = F),]
-      if(!is.null(val_res)){
-        if(length(dat) == 6){
-          dat$extra = as.character(val_res)
-        }else{
-          dat[which(dat[,6] %in% cols),5] = as.character(val_res)
-        }
-      }
-      # if multiple lists
-    }else{
-      dup = unlist(dat[,6])
-      cols = unique(dup[duplicated(unlist(dat[,6]))])
-      dup = dat[unlist(lapply(dat[,6], function(x) any(cols %in% unique(dup[duplicated(unlist(dat[,6]))])))),]
-      val_res = c()
-      for(j in 1:length(cols)){
-        spot = which(unlist(dup[,6]) == cols[j])
-        if(any(is.na(suppressWarnings(as.double(unlist(dup[,5])[spot]))))){
-          cat = T
-          if(length(unlist(dup[,5])[spot]) > 2 && length(unique(unlist(dup[,5])[spot])) > 1){
-            val_res = c(val_res, Mode(unlist(dup[,5])[spot]))
-          }else{
-            val_res = c(val_res, unlist(dup[,5])[spot][[1]])
-          }
-        }else{
-          cat = F
-          vals = suppressWarnings(as.double(unlist(dup[,5])[spot]))
-        }
-        if(handling == "sum" && cat == F) val_res = c(val_res, round(sum(vals), digits=3))
-        if(handling == "mean" && cat == F) val_res = c(val_res, round(mean(vals),digits=3))
-      }
-      if(!is.null(val_res)){
-        dup = as.data.frame(list(add=val_res, where=cols))
-      }
-      dat = dup
-    }
-  }
-  return(dat)
+  return(x)
 }
 
 # calculates the mode
@@ -187,243 +58,112 @@ Mode <- function(x) {
   ux[which.max(tabulate(match(x, ux)))]
 }
 
-# create the UJ including parallelization option
-reshapeData = function(input, additional=F, extraCol=F, handling=F, handlingExtra=F,  parallel=F, cores=F, na.rm=F){
+# create the UJ
+reshapeData = function(input, additional = F, extraCol=F, handling=F, handlingExtra=F, na.rm=F){
   # check status of input
   if(check_colnames(input) == F) stop("The data does not have the right amount of columns or the specific names are not existent. See manual for more information. \n")
   if(check_type(input) == F) stop("The input is not of type 'data.frame'. \n")
   # check type of input$type
-  cnames = check_type_of_type(input)
+  #cnames = check_type_of_type(input)
   # check additional parameter
   if(any(additional != F)){
     if(!(is.character(additional))) stop("The additional parameter needs to  be a character string.")
     if(!any((additional %in% colnames(input)))) stop("The additional parameter has not been specified correctly or does not exist in input.")
-    if(length(additional) == 1) cnames = append(cnames, unique(input[additional])[[1]])
-    if(length(additional) > 1){
-      for(i in 1:length(additional)){
-        cnames = append(cnames, unique(input[additional[i]])[[1]])
-      }
-    }
   }
   # check extraCol parameter
   if(any(extraCol != F)){
     if(!(is.character(extraCol))) stop("The extraCol parameter needs to  be a character string.")
     if(!any((extraCol %in% colnames(input)))) stop("The extraCol parameter has not been specified correctly or does not exist in input.")
-    cnames = append(cnames, extraCol)
   }
-  res = data.frame(matrix(ncol=length(cnames), nrow=0))
-  colnames(res) = cnames
+
   input = input[order(input$id, input$date),]
-  ids = unique(input$id)
-  count = 1
-  if(class(input$date) == 'Date') res[,2] = as.Date(res[,2], origin="1970-01-01")
-  if(class(input$date) == 'factor') res[,2] = as.Date(res[,2], origin="1970-01-01")
-  if(class(input$date) == 'POSIXlt') res[,2] = as.Date.POSIXlt(res[,2])
-  if(class(input$date) == 'POSIXlt') res[,2] = as.POSIXlt(res[,2])
-  if(parallel == T){
-    if(cores == F) cl = makeCluster(detectCores()-1)
-    if((class(cores) != "numeric" | cores > detectCores()) & cores != F){
-      stop("The provided argument 'cores' is either not numeric/integer or greater than 'detectCores()'. Please provide sufficient number of cores. \n")
-    }
-    if(cores != F & class(cores) == "numeric" & cores <= detectCores()){
-      cores = round(cores)
-      cl = makeCluster(cores)
-    }
-    registerDoSNOW(cl)
-    pb <- timerProgressBar(min = 0, max = length(ids), style = 3)
-    progress <- function(n) setTimerProgressBar(pb, n)
-    opts <- list(progress = progress)
-    res_fin = foreach(i=1:length(ids), .combine = rbind, .export=c("mean_sum", "creation", 'Mode'), .inorder=T, .options.snow = opts) %dopar% {
-      sub = subset(input, input$id==ids[i])
-      dates = unique(sub$date)
-      for(k in 1:length(dates)){
-        sub_data = subset(input, input$id==ids[i] & input$date==dates[k])
-        if(nrow(sub_data) > 0){
-          if(class(sub_data$id) == "factor"){
-            res[count,1] = as.numeric(as.character(sub_data$id[1]))
-          }else{
-            res[count,1] = sub_data$id[1]
-          }
-          res[count,2] = sub_data$date[1]
-          dat = do.call(rbind,apply(sub_data, 1, creation, additional=additional, cnames=cnames, d=res, extraCol=extraCol, store=c(), where_all=c(), store_add=c(), where_extra=c(), store_extra=c(), where_add =c()))
-          #### conditions: procedure for multiple observations of same type at same point in time
-          if(any(duplicated(dat[,2]))){
-            # cond 1/2: take most recent value (default) or first value (first)
-            if(handling == F) dat_dup = dat[!duplicated(dat[,2], fromLast = T),]
-            if(handling == 'first') dat_dup = dat[!duplicated(dat[,2]),]
-            # cond 3/4: mean value of existing values/sum of existing values
-            if(handling == "sum") dat_dup = mean_sum(dat, "sum")
-            if(handling == "mean") dat_dup = mean_sum(dat, "mean")
-            # merge data back together and create the result
-            if(length(dat_dup) == 6){
-              res[count, dat_dup$where] = dat_dup$dat
-            }else{
-              res[count, unlist(dat_dup[,2])] = unlist(dat_dup[,1])
-            }
-          }else{
-            res[count, unlist(dat[,2])] = unlist(dat[,1])
-          }
-          if(any(additional != F)){
-            if(any(duplicated(unlist(dat[,4])))){
-              if(length(additional) == 1){
-                dat_add = dat[!duplicated(dat[,4], fromLast = T),]
-                X = F
-              }else{
-                X = T
-                un = unlist(dat[,4])
-                un2 = unlist(dat[,3])
-                dat_add = as.data.frame(list(add = un2[!duplicated(unlist(dat[,3]), fromLast = T)], where=un[!duplicated(unlist(dat[,4]), fromLast = T)]))
-              }
-              if(length(dat_add) == 6){
-                res[count, dat_add$where_add] = dat_add$add
-              }
-              if(isTRUE(X)){
-                res[count, unlist(dat_add[,2])] = unlist(dat_add[,1])
-              }
-              if(!isTRUE(X) && length(dat_add) != 6){
-                res[count, unlist(dat_add[,4])] = unlist(dat_add[,3])
-              }
-            }else{
-              res[count, unlist(dat[,4])] = unlist(dat[,3])
-            }
-          }
-          if(any(extraCol != F)){
-            if(any(duplicated(unlist(dat[,6])))){
-              # cond 1/2: take most recent value (default) or first value (first)
-              if(handlingExtra == F) dat_dup = as.data.frame(list(add = dat[!duplicated(dat[,6], fromLast = T),]$extra, where=dat[!duplicated(dat[,6], fromLast = T),]$where_extra))
-              if(handlingExtra == 'first') dat_dup = as.data.frame(list(add = dat[!duplicated(dat[,6]),]$extra, where=dat[!duplicated(dat[,6]),]$where_extra))
-              # cond 3/4: mean value of existing values/sum of existing values
-              if(handlingExtra == "sum") dat_dup = mean_sum(dat, "sum", colsProcess = 'extraCol')
-              if(handlingExtra == "mean") dat_dup = mean_sum(dat, "mean", colsProcess = 'extraCol')
-              # merge data back together and create the result
-              if(length(dat_dup) == 6){
-                res[count, unlist(dat_dup$where_extra)] = unlist(dat_dup$extra)
-              }else{
-                res[count, unlist(dat_dup[,2])] = as.character(unlist(dat_dup[,1]))
-              }
-            }else{
-              res[count, unlist(dat[,6])] = unlist(dat[,5])
-            }
-          }
-          count = count + 1
-        }else{
-          next;
-        }
-      }
-      return(list(res=res))
-    }
-    close(pb)
-    stopCluster(cl)
-    res_fin = create_res(res_fin, input)
-    res_fin = res_fin[order(res_fin$id, res_fin$date),]
-    rownames(res_fin) = 1:nrow(res_fin)
-    res_fin[3:length(res_fin)] = lapply(res_fin[3:length(res_fin)], as.factor)
-    for(i in 3:ncol(res_fin)){
-      if(suppressWarnings(length(is.na(as.numeric(as.character((na.omit(res_fin[,i])))))) == 0)) next;
-      if(suppressWarnings(any(is.na(as.numeric(as.character((na.omit(res_fin[,i])))))))){
-        res_fin[,i] = as.factor(res_fin[,i])
-      }else{
-        res_fin[,i] = as.numeric(as.character((res_fin[,i])))
-      }
-    }
-    if(na.rm==T) res_fin = res_fin[complete.cases(res_fin),]
-    return(res_fin)
-  }else{
-    pb <- timerProgressBar(min = 0, max = length(ids), style = 3)
-    for(i in 1:length(ids)){
-      sub = subset(input, input$id==ids[i])
-      dates = unique(sub$date)
-      for(k in 1:length(dates)){
-        sub_data = subset(input, input$id==ids[i] & input$date==dates[k])
-        if(nrow(sub_data) > 0){
-          if(class(sub_data$id) == "factor"){
-            res[count,1] = as.numeric(as.character(sub_data$id[1]))
-          }else{
-            res[count,1] = sub_data$id[1]
-          }
-          res[count,2] = sub_data$date[1]
-          dat = do.call(rbind,apply(sub_data, 1, creation, additional=additional, cnames=cnames, d=res, extraCol=extraCol, store=c(), where_all=c(), store_add=c(), where_extra=c(), store_extra=c(), where_add = c()))
-          #### conditions: procedure for multiple observations of same type at same point in time
-          if(any(duplicated(dat[,2]))){
-            # cond 1/2: take most recent value (default) or first value (first)
-            if(handling == F) dat_dup = dat[!duplicated(dat[,2], fromLast = T),]
-            if(handling == 'first') dat_dup = dat[!duplicated(dat[,2]),]
-            # cond 3/4: mean value of existing values/sum of existing values
-            if(handling == "sum") dat_dup = mean_sum(dat, "sum")
-            if(handling == "mean") dat_dup = mean_sum(dat, "mean")
-            # merge data back together and create the result
-            if(length(dat_dup) == 6){
-              res[count, dat_dup$where] = dat_dup$dat
-            }else{
-              res[count, unlist(dat_dup[,2])] = unlist(dat_dup[,1])
-            }
-          }else{
-            res[count, unlist(dat[,2])] = unlist(dat[,1])
-          }
-          if(any(additional != F)){
-            if(any(duplicated(unlist(dat[,4])))){
-              if(length(additional) == 1){
-                dat_add = dat[!duplicated(dat[,4], fromLast = T),]
-                X = F
-              }else{
-                X = T
-                un = unlist(dat[,4])
-                un2 = unlist(dat[,3])
-                dat_add = as.data.frame(list(add = un2[!duplicated(unlist(dat[,3]), fromLast = T)], where=un[!duplicated(unlist(dat[,4]), fromLast = T)]))
-              }
-              if(length(dat_add) == 6){
-                res[count, dat_add$where_add] = dat_add$add
-              }
-              if(isTRUE(X)){
-                res[count, unlist(dat_add[,2])] = unlist(dat_add[,1])
-              }
-              if(!isTRUE(X) && length(dat_add) != 6){
-                res[count, unlist(dat_add[,4])] = unlist(dat_add[,3])
-              }
-            }else{
-              res[count, unlist(dat[,4])] = unlist(dat[,3])
-            }
-          }
-          if(any(extraCol != F)){
-            if(any(duplicated(unlist(dat[,6])))){
-              # cond 1/2: take most recent value (default) or first value (first)
-              if(handlingExtra == F) dat_dup = as.data.frame(list(add = dat[!duplicated(dat[,6], fromLast = T),]$extra, where=dat[!duplicated(dat[,6], fromLast = T),]$where_extra))
-              if(handlingExtra == 'first') dat_dup = as.data.frame(list(add = dat[!duplicated(dat[,6]),]$extra, where=dat[!duplicated(dat[,6]),]$where_extra))
-              # cond 3/4: mean value of existing values/sum of existing values
-              if(handlingExtra == "sum") dat_dup = mean_sum(dat, "sum", colsProcess = 'extraCol')
-              if(handlingExtra == "mean") dat_dup = mean_sum(dat, "mean", colsProcess = 'extraCol')
-              # merge data back together and create the result
-              if(length(dat_dup) == 6){
-                res[count, unlist(dat_dup$where_extra)] = unlist(dat_dup$extra)
-              }else{
-                res[count, unlist(dat_dup[,2])] = as.character(unlist(dat_dup[,1]))
-              }
-            }else{
-              res[count, unlist(dat[,6])] = unlist(dat[,5])
-            }
-          }
-          count = count + 1
-        }else{
-          next;
-        }
-      }
-      setTimerProgressBar(pb, i)
-    }
-    close(pb)
-    res = res[order(res$id, res$date),]
-    rownames(res) = 1:nrow(res)
-    res[3:length(res)] = lapply(res[3:length(res)], as.factor)
-    for(i in 3:ncol(res)){
-      if(suppressWarnings(length(is.na(as.numeric(as.character((na.omit(res[,i])))))) == 0)) next;
-      if(suppressWarnings(any(is.na(as.numeric(as.character((na.omit(res[,i])))))))){
-        res[,i] = as.factor(res[,i])
-      }else{
-        res[,i] = as.numeric(as.character((res[,i])))
-      }
-    }
-    if(na.rm==T) res = res[complete.cases(res),]
-    return(res)
+
+  dt = setDT(input)
+
+  if(handling == 'first'){
+    DT = data.table::dcast(dt, id + date ~ type, value.var = "value", fill=paste(NA), fun.aggregate = function(x) paste(head(x,1), collapse=""))
   }
+
+  if(handling == F){
+    DT = data.table::dcast(dt, id + date ~ type, value.var = "value", fill=paste(NA), fun.aggregate = function(x) paste(tail(x,1), collapse=""))
+  }
+
+  if(handling == 'mean' | handling == "sum"){
+    DT = data.table::dcast(dt, id + date ~ type, value.var = "value", fill=paste(NA), fun.aggregate = function(x) paste(aggCreation(x, handling)))
+  }
+
+
+  if(any(extraCol != F)){
+
+    if(handlingExtra == 'first'){
+      for(i in 1:length(extraCol)){
+        dt_add = data.table::dcast(dt, id + date ~ get(paste(extraCol[i])), value.var = extraCol[i], fill=paste(NA), fun.aggregate = function(x) paste(head(x,1), collapse=""))[,-1]
+        DT = cbind(DT, dt_add)
+      }
+    }
+
+    if(handlingExtra == F){
+      for(i in 1:length(extraCol)){
+        dt_add = data.table::dcast(dt, id + date ~ get(paste(extraCol[i])), value.var = extraCol[i], fill=paste(NA), fun.aggregate = function(x) paste(tail(x,1), collapse=""))[,-1]
+        DT = cbind(DT, dt_add)
+      }
+    }
+
+    if(handlingExtra == 'mean' | handlingExtra == "sum"){
+      for(i in 1:length(extraCol)){
+        dt_add = data.table::dcast(dt, id + date ~ get(paste(extraCol[i])), value.var = extraCol[i], fill=paste(NA), fun.aggregate = function(x) paste(aggCreation(x, handling=handling)))[,-1]
+        DT = cbind(DT, dt_add)
+      }
+    }
+  }
+
+  if(any(additional != F)){
+    cname = c(colnames(DT), additional)
+    for(i in 1:length(additional)){
+      if(handling == 'first'){
+        dt_add = dt[, head(get(paste(additional[i])),1), by=list(id, date)]
+        cbind(DT, dt_add)
+      }
+    }
+
+    if(handling == F){
+      for(i in 1:length(additional)){
+        dt_add = dt[, .(new = tail(get(paste(additional[i])),1)), by=list(id, date)][,3]
+        DT = cbind(DT, dt_add)
+      }
+    }
+
+    if(handling == 'mean' | handling == "sum"){
+      for(i in 1:length(additional)){
+
+        if(any(is.na(suppressWarnings(as.numeric(as.character(dt[,get(paste(additional[i]))])))))){
+          dt_add = dt[, .(new = tail(get(paste(additional[i])),1)), by=list(id, date)][,3]
+          DT = cbind(DT, dt_add)
+        }else{
+          if(handling == "mean"){
+            dt_add = dt[, .(new = mean(as.numeric(as.character(get(paste(additional[i])))))), by=list(id, date)][,3]
+            DT = cbind(DT, dt_add)
+          }
+          if(handling == "sum"){
+            dt_add = dt[, .(new = sum(as.numeric(as.character(get(paste(additional[i])))))), by=list(id, date)][,3]
+            DT = cbind(DT, dt_add)
+          }
+
+        }
+      }
+    }
+    setnames(DT, cname)
+  }
+
+  for(col in names(DT)[-c(1,2)]) set(DT, i=which(DT[[col]]==""), j=col, value=NA)
+
+  res = data.frame(DT)
+  res = res[order(res$id, res$date),]
+
+  res = type.convert(res)
+  if(na.rm==T) res = res[complete.cases(res),]
+
+  return(res)
 }
 
 ###

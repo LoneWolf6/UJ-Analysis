@@ -5,10 +5,10 @@
 %%  ~~function to do ... ~~
 }
 \description{
-This function creates a rectangle version of the User Journey based on specific columns that need to be provided. The rows then represent observations of different variables at a specific point in time for a particular user.
+This function creates a rectangle (wide) version of the User Journey based on specific columns that need to be provided. The rows then represent observations of different variables at a specific point in time for a particular user. The chosen time window between observation is based on the date provided by the user.
 }
 \usage{
-reshapeData(input, additional, extraCol, handling, handlingExtra, parallel, cores, na.rm)
+reshapeData(input, additional, extraCol, handling, handlingExtra, na.rm)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -16,22 +16,16 @@ reshapeData(input, additional, extraCol, handling, handlingExtra, parallel, core
 an object of type data.frame including the mandatory column names 'id', 'type', 'value', and 'date'.
 }
   \item{additional}{
-an optional character string defining an additional column or multiple columns of input to be considered. Then, each unique level of the corresponding column are treated as additional feature in the output.
+an optional character string defining an additional column or multiple columns of input to be considered. Then, each unique level of the corresponding column are treated as additional feature in the output. If multiple observations occur at the same point in time for a specific user, the features will be aggregated as defined in parameter handling.
 }
   \item{extraCol}{
 an optional character string defining an additional column or multiple columns of input to be considered. Then, each column becomes a feature with its corresponding values in the output. These extra features will be handled as specified in handlingExtra.
 }
   \item{handling}{
-an optional character string that defines how multiple observations of same type at same point in time are handled. Can be "first", "sum", or "mean". Default is the consideration of the most recent value only. For categorical variables, if  "sum" or "mean" are specified, the mode is utilized.
+an optional character string that defines how multiple observations of same type at same point in time are handled. Can be "first", "sum", or "mean". Default is the consideration of the most recent value only. For categorical variables, if  "sum" or "mean" are specified, the most recent value is utilized.
 }
   \item{handlingExtra}{
-an optional character string that defines how multiple observations of same type at same point in time are handled for the extra features. Can be "first", "sum", or "mean". Default is the consideration of the most recent value only. For categorical variables, if  "sum" or "mean" are specified, the mode is utilized.
-}
-  \item{parallel}{
-an optional logical value True or False. Parameter specifies if parallel computation is enabled according to the foreach package. Can result in tremendous improvement of computation time. Default is False.
-}
-  \item{cores}{
-an optional non-negative integer. The desired number of cores utilized if parallel = T. Default is the number of cores available -1.
+an optional character string that defines how multiple observations of same type at same point in time are handled for the extra features. Can be "first", "sum", or "mean". Default is the consideration of the most recent value only. For categorical variables, if  "sum" or "mean" are specified, the most recent value is utilized.
 }
   \item{na.rm}{
 an optional logical value True or False. If True, all rows with missing values are omitted. Default is False.
@@ -57,7 +51,7 @@ An object of type data.frame.
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 % \code{\link[caret]{createFolds}}
 \seealso{
-\code{\link[foreach]{foreach}}, \code{\link[doSNOW]{registerDoSNOW}}, \code{\link[parallel]{makeCluster}}, \code{\link[parallel]{detectCores}}
+\code{}
 }
 \examples{
 # create data frame with mandatory columns
@@ -67,7 +61,7 @@ data = data.frame('id'=rep(c(1:5), each=6),
       'date'=rep(seq(as.Date("2000/1/1"), by = "day", length.out=15), each=2))
 
 # use function to create rectangle version of user journey
-dat = reshapeData(data, parallel=T, cores=2, na.rm=F)
+dat = reshapeData(data, na.rm=F)
 
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
