@@ -63,7 +63,7 @@ Mode <- function(x) {
 }
 
 # creates the UJ
-reshapeData = function(input, additional = F, extraCol=F, handling=F, handlingExtra=F, na.rm=F){
+reshapeData = function(input, additional = F, extraCol = F, handling = F, handlingExtra = F, na.rm = F){
   # check status of input
   if(check_colnames(input) == F) stop("The data does not have the right amount of columns or the specific names are not existent. See manual for more information. \n")
   if(check_type(input) == F) stop("The input is not of type 'data.frame'. \n")
