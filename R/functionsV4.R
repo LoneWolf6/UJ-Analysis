@@ -564,27 +564,26 @@ analyzeUJ = function(input, target=F, type='cont', firstFeats=F, lastFeats=F, su
   input = input[order(input$id, input$date),]
   # remove dashes and spaces from colnames
   colnames(input) = gsub(' |-', '', colnames(input))
+
+
   # cut input if interval provided
   if(interval != F){
     if(!(is.wholenumber(interval))) stop('Please specify correct interval. \n')
-    new = as.data.frame(matrix(nrow=0, ncol=ncol(input)))
-    colnames(new) = colnames(input)
-    for(i in 1:length(unique(input$id))){
-      sub = subset(input, input$id==unique(input$id)[i])
-      sub$date = as.Date(sub$date, origin="1970-01-01")
-      idx = which(sub$date >= sub$date[1] + interval)[1]
-      if(is.na(idx)) next;
-      new = rbind(new, sub[1:idx,])
-    }
-    input = new
+    setDT(input)
+    input$date = as.Date(input$date, origin="1970-01-01")
+    input = input[, .SD[1:which(date >= date[1] + interval)[1]], by=id]
+    setorder(bla, id, date)
+    input = as.data.frame(input)
   }
+
   # delete categorical variables with not enough levels
   idx = colnames(input)[-which(colnames(input) %in% c("id","date"))]
+
   levs = lapply(lapply(input[,idx], unique), function(x) length(x[!is.na(x)]) > 1)
   if(any(levs == F)){
     input = input[, !(colnames(input) %in% names(which(levs == F)))]
-    #input = input[, !(colnames(input) %in% idx[which(levs == F)])]
   }
+
   # if aggregate, transform input
   if(type == 'aggregate'){
     # check if only one value of target for each user
@@ -662,6 +661,9 @@ analyzeUJ = function(input, target=F, type='cont', firstFeats=F, lastFeats=F, su
       }
     }
   }
+
+  ### UNTIL HEERE
+
   if((isTRUE(missing) || any(is.na(input))) && imp == F) input = imputeData(input, perc=F, missing, target, percEx)
   # set classification or regression types
   if(task == 'classification'){
