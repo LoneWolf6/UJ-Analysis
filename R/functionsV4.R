@@ -768,6 +768,9 @@ analyzeUJ = function(input, target=F, type='cont', firstFeats=F, lastFeats=F, su
 
     ######## Analysis
 
+    # foldid for glmnet package
+    foldid = sample(1:10, size=nrow(input), replace=TRUE)
+
     # all/svm
     if(method == 'all' || 'svm' %in% method){
       if(task == "regression"){
@@ -808,7 +811,7 @@ analyzeUJ = function(input, target=F, type='cont', firstFeats=F, lastFeats=F, su
       mod.matrix = sparse.model.matrix(formula(modelString),rbind(train, test))
       mat = mod.matrix[1:nrow(train),]
       mat_test = mod.matrix[(nrow(train)+1):nrow(mod.matrix),]
-      fit_lasso = cv.glmnet(mat, y = train[,target], alpha=1, family=typeLASSO, standardize=scale, lambda=10^seq(10,-2,length=1000))
+      fit_lasso = cv.glmnet(mat, y = train[,target], alpha=1, foldid=foldid, family=typeLASSO, standardize=scale, lambda=10^seq(10,-2,length=1000))
 
       if(task == "regression") res$pred$pred_lasso[[i]] = predict(fit_lasso, mat_test, type="link", s='lambda.min')
 
@@ -825,7 +828,7 @@ analyzeUJ = function(input, target=F, type='cont', firstFeats=F, lastFeats=F, su
       mod.matrix = sparse.model.matrix(formula(modelString),rbind(train, test))
       mat = mod.matrix[1:nrow(train),]
       mat_test = mod.matrix[(nrow(train)+1):nrow(mod.matrix),]
-      fit_ridge = cv.glmnet(mat, y = train[,target], alpha=0, standardize=scale, family=typeLASSO, lambda=10^seq(10,-2,length=1000))
+      fit_ridge = cv.glmnet(mat, y = train[,target], alpha=0, foldid=foldid, standardize=scale, family=typeLASSO, lambda=10^seq(10,-2,length=1000))
 
       if(task == "regression") res$pred$pred_ridge[[i]] = predict(fit_ridge, mat_test, type="link",s='lambda.min')
 
@@ -931,13 +934,13 @@ analyzeUJ = function(input, target=F, type='cont', firstFeats=F, lastFeats=F, su
       # all/lasso
       if(method == 'all' || 'lasso' %in% method){
         mat = sparse.model.matrix(formula(modelString),input)
-        res$fit$fit_lasso = cv.glmnet(mat, y = input[,target], alpha=1, family=typeLASSO, standardize=scale)
+        res$fit$fit_lasso = cv.glmnet(mat, y = input[,target], alpha=1, foldid=foldid, family=typeLASSO, standardize=scale)
       }
 
       # all/ridge
       if(method == 'all' || 'ridge' %in% method){
         mat = sparse.model.matrix(formula(modelString),input)
-        res$fit$fit_ridge = cv.glmnet(mat, y = input[,target], alpha=0, family=typeLASSO, standardize=scale)
+        res$fit$fit_ridge = cv.glmnet(mat, y = input[,target], alpha=0, foldid=foldid, family=typeLASSO, standardize=scale)
       }
 
       # all/boost
