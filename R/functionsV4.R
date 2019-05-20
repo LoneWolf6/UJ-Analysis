@@ -769,7 +769,7 @@ analyzeUJ = function(input, target=F, type='cont', firstFeats=F, lastFeats=F, su
     ######## Analysis
 
     # foldid for glmnet package
-    foldid = sample(1:10, size=nrow(input), replace=TRUE)
+    foldid = sample(1:10, size=nrow(train), replace=TRUE)
 
     # all/svm
     if(method == 'all' || 'svm' %in% method){
@@ -884,6 +884,10 @@ analyzeUJ = function(input, target=F, type='cont', firstFeats=F, lastFeats=F, su
     setTimerProgressBar(pb, i)
 
     # execute ML based on all data for inferential outcomes
+
+    # foldid for glmnet package
+    foldid = sample(1:10, size=nrow(input), replace=TRUE)
+
     if(i == max(folds)){
       if((isTRUE(missing) || any(is.na(input))) && isTRUE(imp)) input = imputeData(input, perc=F, missing, target, percEx)
       inputUsed = input
