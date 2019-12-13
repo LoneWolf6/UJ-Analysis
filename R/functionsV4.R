@@ -84,7 +84,7 @@ reshapeData = function(input, additional = F, extraCol = F, handling = F, handli
 
   input = input[order(input$id, input$date),]
 
-  dt = setDT(input)
+  dt = as.data.table(input)
 
   if(handling == 'first'){
     DT = data.table::dcast(dt, id + date ~ type, value.var = "value", fill=paste(NA), fun.aggregate = function(x) paste(head(x,1), collapse=""))
