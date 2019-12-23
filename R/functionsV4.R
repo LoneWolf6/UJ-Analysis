@@ -604,6 +604,7 @@ analyzeUJ = function(input, target=F, type='cont', firstFeats=F, lastFeats=F, su
       }else{
         input = input[,-which(apply(input,2,pMiss) > perc)]
       }
+      if(length(colnames(input)) < 4) stop("No features are left after deletion based on missing values")
     }
     targetVar = input[!duplicated(input$id),target]
     input = input[,-which(colnames(input) %in% c('date',target))]
