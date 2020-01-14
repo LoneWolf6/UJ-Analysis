@@ -689,6 +689,7 @@ analyzeUJ = function(input, target=F, type='cont', firstFeats=F, lastFeats=F, su
   }else{
     fold = 1
     folds = 1
+    set.seed(123)
     indexes = sample(1:nrow(input), size=(split/100)*nrow(input))
     test = input[-indexes,]
     train = input[indexes,]
@@ -770,6 +771,7 @@ analyzeUJ = function(input, target=F, type='cont', firstFeats=F, lastFeats=F, su
     ######## Analysis
 
     # foldid for glmnet package
+    set.seed(123)
     foldid = sample(1:10, size=nrow(train), replace=TRUE)
 
     # all/svm
@@ -887,6 +889,7 @@ analyzeUJ = function(input, target=F, type='cont', firstFeats=F, lastFeats=F, su
     # execute ML based on all data for inferential outcomes
 
     # foldid for glmnet package
+    set.seed(123)
     foldid = sample(1:10, size=nrow(input), replace=TRUE)
 
     if(i == max(folds)){
