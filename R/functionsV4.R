@@ -282,7 +282,7 @@ TimeWindow = function(input, parallel=F, cores=F, target, no.use=F, steps=2){
   mean_res = data.frame()
   if(parallel == F){
     pb <- timerProgressBar(min = 0, max = length(ids), style = 3)
-    for(i in 1:length(ids)){
+    for(i in seq_along(ids)){
       sub = subset(data, data$id==ids[i])
       sum = matrix(nrow=nrow(sub), ncol=ncol(sub)-1)
       max = matrix(nrow=nrow(sub), ncol=ncol(sub)-1)
@@ -291,7 +291,7 @@ TimeWindow = function(input, parallel=F, cores=F, target, no.use=F, steps=2){
       mean = matrix(nrow=nrow(sub), ncol=ncol(sub)-1)
       if(steps < nrow(sub)){
         cutpoints = seq(1, nrow(sub), steps)
-        for(k in 1:length(cutpoints)){
+        for(k in seq_along(cutpoints)){
           if(is.na(cutpoints[k+1])) next;
           sum[cutpoints[k+1]-1,] = do.call(rbind,list(apply(sub[cutpoints[k]:(cutpoints[k+1]-1),-1], 2, sum)))
           max[cutpoints[k+1]-1,] = do.call(rbind,list(apply(sub[cutpoints[k]:(cutpoints[k+1]-1),-1], 2, max)))
@@ -339,7 +339,7 @@ TimeWindow = function(input, parallel=F, cores=F, target, no.use=F, steps=2){
       mean[,1] = sub$id
       if(steps < nrow(sub)){
         cutpoints = seq(1, nrow(sub), steps)
-        for(k in 1:length(cutpoints)){
+        for(k in seq_along(cutpoints)){
           if(is.na(cutpoints[k+1])) next;
           sum[cutpoints[k+1]-1,2:ncol(sum)] = do.call(rbind,list(apply(sub[cutpoints[k]:(cutpoints[k+1]-1),-1], 2, sum)))
           max[cutpoints[k+1]-1,2:ncol(max)] = do.call(rbind,list(apply(sub[cutpoints[k]:(cutpoints[k+1]-1),-1], 2, max)))
