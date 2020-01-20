@@ -187,7 +187,7 @@ reshapeData = function(input, additional = F, extraCol = F, handling = F, handli
   res = res[order(res$id, res$date),]
 
   res = type.convert(res)
-  if(na.rm==T) res = res[complete.cases(res),]
+  if(na.rm) res = res[complete.cases(res),]
 
   return(res)
 }
@@ -225,7 +225,7 @@ createInteractionTerms = function(input, target, no.use=F, na.rm=F){
   res = lapply(res, as.factor)
   res_fin = cbind(input, res)
   colnames(res_fin)[which(colnames(res_fin) == "target")] = target
-  if(na.rm==T) res_fin = res_fin[complete.cases(res_fin),]
+  if(na.rm) res_fin = res_fin[complete.cases(res_fin),]
   return(res_fin)
 }
 
@@ -593,7 +593,7 @@ analyzeUJ = function(input, target=F, type='cont', firstFeats=F, lastFeats=F, su
     if(any(firstFeats != F)) firstFeats = gsub(' |-', '', firstFeats)
     if(any(sumFeats != F)) sumFeats = gsub(' |-', '', sumFeats)
     # check if no categorical variables are defined for sumFeats
-    if(any(sapply(input[,which(colnames(input) %in% sumFeats)], is.numeric)) ==F && sumFeats != F) stop("Categorical features were specified in sumFeats. Not possible.")
+    if(any(sapply(input[,which(colnames(input) %in% sumFeats)], is.numeric)) == F && sumFeats != F) stop("Categorical features were specified in sumFeats. Not possible.")
     # delete columns corresponding to amount of missing values
     if(perc != F && is.numeric(perc) == F) stop("Please provide numeric value for percentage.")
     if(perc != F){
@@ -756,7 +756,7 @@ analyzeUJ = function(input, target=F, type='cont', firstFeats=F, lastFeats=F, su
     }
 
     # verify optPara
-    if(optPara==T){
+    if(optPara){
       if(method == 'all' || 'svm' %in% method){
         svm_parameters = getBestSVM(train, modelString, target, typeSVM, task=task)
       }
@@ -845,7 +845,7 @@ analyzeUJ = function(input, target=F, type='cont', firstFeats=F, lastFeats=F, su
 
     # all/boost
     if(method == 'all' || 'treeBoost' %in% method){
-      if(optPara==T){
+      if(optPara){
         mod.matrix = sparse.model.matrix(formula(modelString),rbind(train, test))
         mat = mod.matrix[1:nrow(train),]
         mat_test = mod.matrix[(nrow(train)+1):nrow(mod.matrix),]
@@ -953,7 +953,7 @@ analyzeUJ = function(input, target=F, type='cont', firstFeats=F, lastFeats=F, su
 
       # all/boost
       if(method == 'all' || 'treeBoost' %in% method){
-        if(optPara==T){
+        if(optPara){
           mat = model.matrix(formula(modelString),input)
           xgboost_parameters = getBestXgboost(mat, train=input, task=task, target=target)
           res$fit$fit_boost = xgboost(data = mat, label=input[,which(colnames(input) == target)], nrounds = 1000, verbose=0, max.depth=as.numeric(xgboost_parameters[2]),
@@ -1106,7 +1106,7 @@ analyzeUJ = function(input, target=F, type='cont', firstFeats=F, lastFeats=F, su
     }
 
 
-    if(ROC==T && length(unique(input[,target])) == 2 && length(res$perf_lasso) > 0){
+    if(isTRUE(ROC) && length(unique(input[,target])) == 2 && length(res$perf_lasso) > 0){
       AUCLasso = c()
       ROCLasso = list()
       for(f in 1:folds){
@@ -1122,7 +1122,7 @@ analyzeUJ = function(input, target=F, type='cont', firstFeats=F, lastFeats=F, su
     }
 
 
-    if(ROC==T && length(unique(input[,target])) == 2 && length(res$perf_ridge) > 0){
+    if(isTRUE(ROC) && length(unique(input[,target])) == 2 && length(res$perf_ridge) > 0){
       AUCRidge = c()
       ROCRidge = list()
       for(f in 1:folds){
@@ -1138,7 +1138,7 @@ analyzeUJ = function(input, target=F, type='cont', firstFeats=F, lastFeats=F, su
     }
 
 
-    if(ROC==T && length(unique(input[,target])) == 2 && length(res$perf_log) > 0){
+    if(isTRUE(ROC) && length(unique(input[,target])) == 2 && length(res$perf_log) > 0){
       AUCLog = c()
       ROCLog = list()
       for(f in 1:folds){
@@ -1154,7 +1154,7 @@ analyzeUJ = function(input, target=F, type='cont', firstFeats=F, lastFeats=F, su
     }
 
 
-    if(ROC==T && length(unique(input[,target])) == 2 && length(res$perf_svm) > 0){
+    if(isTRUE(ROC) && length(unique(input[,target])) == 2 && length(res$perf_svm) > 0){
       AUCSVM = c()
       ROCSVM = list()
       for(f in 1:folds){
@@ -1170,7 +1170,7 @@ analyzeUJ = function(input, target=F, type='cont', firstFeats=F, lastFeats=F, su
     }
 
 
-    if(ROC==T && length(unique(input[,target])) == 2 && length(res$perf_boost) > 0){
+    if(isTRUE(ROC) && length(unique(input[,target])) == 2 && length(res$perf_boost) > 0){
       AUCBoost = c()
       ROCBoost = list()
       for(f in 1:folds){
