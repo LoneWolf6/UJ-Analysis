@@ -529,7 +529,10 @@ ROCValues=function(x,y,at){
 }
 
 # performs k-fold cross validation using multiple machine learning techniques for comparison
-analyzeUJ = function(input, target=F, type='cont', firstFeats=F, lastFeats=F, sumFeats = F, method='all', PCA=F, PCAOnly=F, comps=0, task='regression', interval=F, crossValidation=T, split=70, folds=10, optPara=F, missing=F,imp=F, perc=F, percEx=F, exFeat=NULL, ROC=T, proba=.5, scale=T){
+analyzeUJ = function(input, target=F, type='cont', firstFeats=F, lastFeats=F, sumFeats = F,
+                     method='all', PCA=F, PCAOnly=F, comps=0, task='regression', interval=F,
+                     crossValidation=T, split=70, folds=10, optPara=F, missing=F,imp=T, perc=F,
+                     percEx=F, exFeat=NULL, ROC=T, proba=.5, scale=T, holdout = FALSE, holdoutSize = 20){
 
   ######
   ## prepare data
@@ -541,6 +544,7 @@ analyzeUJ = function(input, target=F, type='cont', firstFeats=F, lastFeats=F, su
   if(any(firstFeats !=F) && any(!(firstFeats %in% colnames(input)))) stop("A specified feature does not exist as column in input data.")
   if(any(lastFeats != F) && any(!(lastFeats %in% colnames(input)))) stop("A specified feature does not exist as column in input data.")
   if(missing != F && !(missing %in% c("median/mode","knn"))) stop("Please provide appropriate value for missing. \n")
+  if(!is.numeric(holdoutSize) || !holdoutSize < 100 || holdoutSize == 0) stop("Please provide appropriate value for holdoutSize. \n")
   if(target == F) stop("Please provide your target variable.")
   if(imp != F && imp != T) stop("Please provide logical value True or False for the parameter imp.")
   if(!(is.numeric(split)) || split > 100 || split < 0) stop('The parameter split is not specified correctly.')
@@ -663,9 +667,18 @@ analyzeUJ = function(input, target=F, type='cont', firstFeats=F, lastFeats=F, su
     }
   }
 
-  ### UNTIL HEERE
+  if((isTRUE(missing) || any(is.na(input))) && !imp) input = imputeData(input, perc=F, missing, target, percEx)
 
-  if((isTRUE(missing) || any(is.na(input))) && imp == F) input = imputeData(input, perc=F, missing, target, percEx)
+  # for analyses set holdout set aside if holdout = TRUE
+  if(holdout && !imp){
+    setDT(input)
+    set.seed(19)
+    holdoutUsers = sample(unique(input$id), size = holdoutSize/100*length(unique(input$id)))
+    holdoutSet = input[id %in% holdoutUsers]
+    input = input[!(id %in% holdoutUsers)]
+    setDF(input)
+  }
+
   # set classification or regression types
   if(task == 'classification'){
     typeSVM = 'C-classification'
@@ -886,17 +899,54 @@ analyzeUJ = function(input, target=F, type='cont', firstFeats=F, lastFeats=F, su
 
     setTimerProgressBar(pb, i)
 
-    # execute ML based on all data for inferential outcomes
-
-    # foldid for glmnet package
-    set.seed(123)
-    foldid = sample(1:10, size=nrow(input), replace=TRUE)
+    # execute ML based on all data for inferential outcomes and final model
 
     if(i == max(folds)){
-      if((isTRUE(missing) || any(is.na(input))) && isTRUE(imp)) input = imputeData(input, perc=F, missing, target, percEx)
+      if((isTRUE(missing) || any(is.na(input))) && isTRUE(imp)){
+        if(holdout){
+          modelString = getModelString(input, target, exFeat)
+          setDT(input)
+          set.seed(19)
+          holdoutUsers = sample(unique(input$id), size = holdoutSize/100*length(unique(input$id)))
+          holdoutSet = input[id %in% holdoutUsers]
+          input_part = input[!(id %in% holdoutUsers)]
+          setDF(input_part)
+          setDF(holdoutSet)
+          setDF(input)
+          if(any(is.na(input_part))) input_part = imputeData(input_part, perc=F, missing, target, percEx)
+          if(any(is.na(holdoutSet))) holdoutSet = imputeData(holdoutSet, perc=F, missing, target, percEx)
+          idx_input = colnames(input_part)[-which(colnames(input_part) %in% c("id","date"))]
+          idx_holdoutSet = colnames(holdoutSet)[-which(colnames(holdoutSet) %in% c("id","date"))]
+          levs_input = lapply(lapply(input_part[,idx_input], unique), function(x) length(x[!is.na(x)]) > 1)
+          levs_holdout = lapply(lapply(holdoutSet[,idx_holdoutSet], unique), function(x) length(x[!is.na(x)]) > 1)
+          levs = append(levs_input, levs_holdout)
+          if(target %in% names(levs)) levs = levs[-which(names(levs) == target)]
+          if(any(levs == F)){
+            input_part = input_part[, !(colnames(input_part) %in% names(which(levs == F)))]
+            holdoutSet = holdoutSet[, !(colnames(holdoutSet) %in% names(which(levs == F)))]
+            modelString = getModelString(input_part, target, exFeat)
+          }
+          # adjust factor levels
+          if(any(sapply(input, is.factor))){
+            f = names(input[names(which(sapply(input, is.factor)))])
+            for(j in 1:length(f)){
+              levels(input_part[,f[j]]) = c(levels(input_part[,f[j]]), levels(holdoutSet[,f[j]]))
+              levels(holdoutSet[,f[j]]) = c(levels(holdoutSet[,f[j]]), levels(input_part[,f[j]]))
+            }
+          }
+          input = input_part
+          holdoutSet = holdoutSet
+        }else{
+          input = imputeData(input, perc=F, missing, target, percEx)
+        }
+      }
       inputUsed = input
 
       ########
+
+      # foldid for glmnet package
+      set.seed(123)
+      foldid = sample(1:10, size=nrow(input), replace=TRUE)
 
       # PCA
       if(PCA == T){
@@ -1211,7 +1261,8 @@ analyzeUJ = function(input, target=F, type='cont', firstFeats=F, lastFeats=F, su
     TargetPredictions$preds = TargetPreds=list(SVM=unlist(res$pred$pred_svm), Lasso=unlist(res$pred$pred_lasso),Ridge= unlist(res$pred$pred_ridge),
                                                Tree=unlist(res$pred$pred_boost),LOG=unlist(res$pred$pred_log))
   }
-  result = list(input=inputUsed, fold=fold, TargetObservations=res$obs,
+  if(!holdout) holdoutSet = "Not specified"
+  result = list(input=inputUsed, holdoutSet = holdoutSet, fold=fold, TargetObservations=res$obs,
                 TargetPredictions=TargetPredictions,
                 performance=perf, results=list(LM=res$fit$fit_lm, Log=res$fit$fit_log, SVM=res$fit$fit_svm, Lasso=res$fit$fit_lasso, Ridge=res$fit$fit_ridge, Tree=res$fit$fit_boost))
 

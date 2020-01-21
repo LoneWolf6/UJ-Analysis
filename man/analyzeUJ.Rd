@@ -85,7 +85,7 @@ treeBoost: grid based search for eta, max_depth, gamma, colsample_bytree, and mi
 an optional logical value True or False. Defines if missing values are imputed. Can be "median/mode" or "knn". If median/mode, categorical variables are imputed by mode and numeric variables by median corresponding to the \link[imputeMissings]{impute}function. If knn, missings values are imputed by k-Nearest Neighbour method according to the \link[VIM]{kNN} function with default values. The knn method can increase computation time depending on the amount of observations and features. Default is False. However, if missing values are still detected, median/mode is applied. After imputation procedure, complete cases are used for analysis.
 }
   \item{imp}{
-an optional logical value True or False. If missing values exist, this parameter defines if imputation should be executed before the split into training and test set or after the split on each corresponding training and test set. Default is False and imputation will be executed before the split.
+an optional logical value True or False. If missing values exist, this parameter defines if imputation should be executed before the split into training and test set or after the split on each corresponding training and test set. Default is True and imputation will be executed before the split (also affects holdout set if specified).
 }
   \item{perc}{
 an optional non-negative numeric value. If missing is True or missing values are detected, this value defines the percentage of missing values up to which features are excluded from the analysis. Default is none.
@@ -104,6 +104,12 @@ an optional numeric value between 0 and 1. If task is classification, this is th
 }
   \item{scale}{
 an optional logical value True or False. Numeric features will be scaled. Default is True.
+}
+  \item{holdout}{
+an optional logical value True or False. Choose if holdout set should be set aside. Default is FALSE.
+}
+  \item{holdoutSize}{
+a numeric value for the percentage of users in the holdout set, i.e., 25 for 25\%. Default is 20\%.
 }
 }
 \details{
