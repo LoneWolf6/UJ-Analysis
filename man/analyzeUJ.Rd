@@ -8,7 +8,7 @@
 This function applies multiple machine learning techniques for regression or classification. It can select features that contribute to the prediction performance. Additionally, all machine learning techniques are evaluated by RMSE/MAE for regression or ROC/AUC for classification, which are returned as well as the predictions and effects for each model. Note that if categorical variables are included in the data, features with not enough levels will be automatically excluded. You can verify the utilized features in the resulting list.
 }
 \usage{
-analyzeUJ(input, target, type, firstFeats, lastFeats, sumFeats, method, PCA, PCAOnly, comps, task, interval, crossValidation, split, folds, optPara, missing, imp, perc, percEx, exFeat, ROC, proba, scale)
+analyzeUJ(input, target, type, firstFeats, lastFeats, sumFeats, method, PCA, PCAOnly, comps, task, interval, crossValidation, split, folds, optPara, missing, imp, perc, percEx, exFeat, ROC, proba, scale, holdout, holdoutSize)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
