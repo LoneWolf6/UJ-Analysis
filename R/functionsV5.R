@@ -576,8 +576,8 @@ analyzeUJ = function(input, target=F, type='cont', firstFeats=F, lastFeats=F, su
     setDT(input)
     input$date = as.Date(input$date, origin="1970-01-01")
     input = input[, .SD[1:which(date >= date[1] + interval)[1]], by=id]
-    setorder(bla, id, date)
-    input = as.data.frame(input)
+    setorder(input, id, date)
+    setDF(input)
   }
 
   # delete categorical variables with not enough levels
