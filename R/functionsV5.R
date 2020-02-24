@@ -446,7 +446,7 @@ getBestXgboost = function(mat, train, task, target){
                          gamma = c(0,1), # regularizer
                          colsample_bytree = c(0.4,0.8), # number of features supplied to the tree
                          min_child_weight = c(1,20), # blocks the potential feature interactions to prevent overfitting
-                         subsample = 1) # controls the number of features (variables) supplied to a tree
+                         subsample = 1) # subsample training ratio
 
   if(task == "classification"){
     y=as.factor(train[,which(colnames(train) == target)])
