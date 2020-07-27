@@ -3,16 +3,6 @@ This repository consists of a R package and is intended as a framework for user 
 
 ![](assets/process.png)
 
-## Setting and other information
-
-* Clone this repository to your computer or download the repository.
-* In the terminal, navigate to the folder where the downloaded repository is in. 
-* To build package, type 'R CMD build UJ-Analysis'. 
-* To install package, type 'R CMD INSTALL UJAnalysis_0.1.0.tar.gz'.
-* In some cases, the dependencies must be installed manually.
-* It is now possible to access the help functions such as '?reshapeData'.
-* Note: The package is still in development and computational efficiency is improved.
-
 ## Included steps 
 
 ### Data transformation
@@ -22,4 +12,29 @@ Often, a first step to analyze user journey data is the tranformation of raw dat
 Feature engineering is often applied when using machine learning models. Generic approaches for including additional features into the data are supported by this package. Interaction terms such as the product of two original features might increase predictive performance. Binning can be used to pre-process data and reduce observation errors. Furthermore, time-window-based features, which aggregate features for a specific time-interval defined by the user have shown to produce benefits in terms of predictive performance. The help functions of 'createInteractionTerms', 'binning', and 'TimeWindow' include more information and an example.
 
 ### Statistical analysis and model evaluation
+The application of machine learning models in this package follows the image below. The dataset can be split into a training set for fitting the data and learning patterns and a test (or holdout) set, which is used for the final model performance of a selected algorithm. In this framework, logistic regression, linear regression, support vector machines, boosted decision trees, and regularization techniques (L1 and L2) are currently implemented. This framework was developed for regression as well as classification tasks that need to be defined by the user. Users may wish to compare their predictive performance to justify the model selection. To gauge the predictive performance of a specified model, k-fold cross-validation is is implemented.  
 ![](assets/ML.png)
+
+
+## Installation
+
+Clone this repository to your computer or download the repository:
+
+`git clone https://github.com/VBremer/UJ-Analysis.git`
+
+Change into the cloned folder `cd UJ-Analysis.git` and  build the package:
+
+`R CMD build UJ-Analysis`
+
+Now install the package:
+
+`R CMD INSTALL UJAnalysis_0.1.0.tar.gz`
+
+Note that in some cases, the dependencies must be installed manually.
+
+
+## Usage
+Example for Usage
+
+* The package can now be loaded: `library(UJAnalysis)`
+* It is now possible to access the help functions such as `?reshapeData` or `analyzeUJ`.
