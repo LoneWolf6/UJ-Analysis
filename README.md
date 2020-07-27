@@ -37,5 +37,6 @@ Now install the package:
 Note that in some cases, the dependencies must be installed manually.
 
 ## Usage
-* The package can now be loaded: `library(UJAnalysis)`
-* It is now possible to access the help functions such as `?reshapeData` or `?analyzeUJ`.
+The package can now be loaded: `library(UJAnalysis)`
+
+It is now possible to access the help functions such as `?reshapeData` or `?analyzeUJ`.
