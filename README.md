@@ -20,4 +20,4 @@ Often, a first step to analyze user journey data is the tranformation of raw dat
 Feature engineering is often applied when using machine learning models. Generic approaches for including additional features into the data are supported by this package. Interaction terms such as the product of two original features might increase predictive performance. Binning can be used to pre-process data and reduce observation errors. Furthermore, time-window-based features, which aggregate features for a specific time-interval defined by the user have shown to produce benefits in terms of predictive performance. The help functions of 'createInteractionTerms', 'binning', and 'TimeWindow' include more information and an example.
 
 ### Statistical analysis and model evaluation
-![alt text](https://github.com/VBremer/UJ-Analysis/assets/ML.png?raw=true)
+![](assets/ML.png)
