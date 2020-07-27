@@ -1,5 +1,7 @@
 # R package for the analysis of user journey data
-This repository consists of a R package and is intended as a framework for user journey analysis in the domain of e-mental health. It includes functions for the creation of user journey data, feature creation, and an analysis wrapper.
+This repository consists of a R package and is intended as a framework for user journey analysis in the domain of digital health interventions. It includes functions for the creation of user journey data, feature creation, and an analysis wrapper.
+
+![](assets/process.png)
 
 ## Setting and other information
 
