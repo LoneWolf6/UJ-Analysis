@@ -26,7 +26,7 @@ Make sure devtools are installed:
 
 `install.packages("devtools")`
 
-To build the packahe, run:
+To build the package, run:
 
 `R CMD build UJ-Analysis`
 
