@@ -14,7 +14,7 @@ getBestSVM =function(input, model_str,target, typeSVM, task){
 
 # grid search for xgboost
 getBestXgboost = function(mat, train, task, target){
-  
+
   xgb_grid = expand.grid(nrounds = 1000, # maximum number of iterations
                          eta = c(0.1, 0.01, 0.0001), # learning rate
                          max_depth = c(2,6,10), # depth of tree
@@ -22,7 +22,7 @@ getBestXgboost = function(mat, train, task, target){
                          colsample_bytree = c(0.4,0.8), # number of features supplied to the tree
                          min_child_weight = c(1,20), # blocks the potential feature interactions to prevent overfitting
                          subsample = 1) # subsample training ratio
-  
+
   if(task == "classification"){
     y=as.factor(train[,which(colnames(train) == target)])
     levels(y) = c("no", "yes")
@@ -34,11 +34,11 @@ getBestXgboost = function(mat, train, task, target){
     metric = "RMSE"
     classProb = F
   }
-  
-  cv_ctrl = trainControl(method = "repeatedcv", repeats = 1,number = 2,
+
+  cv_ctrl = trainControl(method = "cv", number = 10,
                          classProbs = classProb,
                          allowParallel=T)
-  
+
   xgb_tune = caret::train(x=mat,
                           y=y,
                           method="xgbTree",
